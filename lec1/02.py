@@ -1,3 +1,5 @@
+import sys
+
 def count_alphabets(word):
     alphabets = {}
     for alphabet in word:
@@ -6,33 +8,12 @@ def count_alphabets(word):
         alphabets[alphabet] += 1
     return alphabets
 
-def binsearch_anagram(originalword, word, dictionary):
-    l = len(dictionary)
-    start = 0
-    end = l-1
-    anagrams = []
-    while(start <= end):
-        mid = start + (end - start)//2
-        if word == dictionary[mid][0]:
-            left = mid - 1
-            while left >= start and dictionary[left][0] == word:
-                if(dictionary[left][1] != originalword):
-                    anagrams.append(dictionary[left][1])
-                left -= 1
-            if(dictionary[mid][1] != originalword):
-                anagrams.append(dictionary[mid][1])
-            right = mid + 1
-            while right <= end and dictionary[right][0] == word:
-                if(dictionary[right][1] != originalword):
-                    anagrams.append(dictionary[right][1])
-                right += 1
-            break
-        elif(word < dictionary[mid][0]):
-            end = mid-1
-        elif(word > dictionary[mid][0]):
-            start = mid+1
-    
-    return anagrams
+def score_word(word):
+    scores = [1, 3, 2, 2, 1, 3, 3, 1, 1, 4, 4, 2, 2, 1, 1, 3, 4, 1, 1, 1, 2, 3, 3, 4, 3, 4]
+    total = 0
+    for char in word:
+        total += scores[ord(char) - ord('a')]
+    return total
 
 def countsearch_anagram(originalword, word_count, dictionary):
     anagrams = []
@@ -47,16 +28,35 @@ def countsearch_anagram(originalword, word_count, dictionary):
     return anagrams
 
 
-if __name__ == "__main__":
+def main(data_file, output_file):
     counted_dictionary = []
-    with open("./words.txt") as f:
+    with open('lec1/words.txt') as f:
         for line in f:
             line = line.rstrip("\n")
             counted_dictionary.append([line, count_alphabets(line)])
 
-    input_words = list(input().split())
     words = []
-    for word in input_words:
+    with open(data_file) as f:
+        for line in f:
+            words.append(line)
+
+    output = []
+    for word in words:
         anagrams = countsearch_anagram(word, count_alphabets(word), counted_dictionary)
-        print("word =",word,"anagrams =",anagrams)
-    
+        maxscore = 0
+        for anagram in anagrams:
+            score = score_word(anagram)
+            if score > maxscore:
+                maxscore = score
+                maxword = anagram
+        output.append(maxword)
+
+    with open(output_file, 'w') as f:
+        for word in output:
+            print(word, file=f) 
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("usage: %s data_file your_answer_file" % sys.argv[0])
+        exit(1)
+    main(sys.argv[1], sys.argv[2])

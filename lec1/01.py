@@ -36,7 +36,7 @@ def binsearch_anagram(originalword, word, dictionary):
 
 if __name__ == "__main__":
     new_dictionary = []
-    with open("./words.txt") as f:
+    with open("lec1/words.txt") as f:
         for line in f:
             line = line.rstrip("\n")
             sorted_word = sort_word(line)
