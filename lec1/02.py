@@ -16,7 +16,7 @@ def score_word(word):
     return total
 
 def countsearch_anagram(originalword, word_count, dictionary):
-    anagrams = []
+    maxscore = 0
     for entry in dictionary:
         if entry[0] == originalword:
             continue
@@ -24,8 +24,11 @@ def countsearch_anagram(originalword, word_count, dictionary):
             if char not in word_count or word_count[char] < count:
                 break
         else:
-            anagrams.append(entry[0])
-    return anagrams
+            score = score_word(entry[0])
+            if score > maxscore:
+                maxscore = score
+                maxword = entry[0]
+    return maxword
 
 
 def main(data_file, output_file):
@@ -42,14 +45,7 @@ def main(data_file, output_file):
 
     output = []
     for word in words:
-        anagrams = countsearch_anagram(word, count_alphabets(word), counted_dictionary)
-        maxscore = 0
-        for anagram in anagrams:
-            score = score_word(anagram)
-            if score > maxscore:
-                maxscore = score
-                maxword = anagram
-        output.append(maxword)
+        output.append(countsearch_anagram(word, count_alphabets(word), counted_dictionary))
 
     with open(output_file, 'w') as f:
         for word in output:
