@@ -25,6 +25,14 @@ def read_minus(line, index):
     token = {'type': 'MINUS'}
     return token, index + 1
 
+def read_multi(line, index):
+    token = {'type': 'MULTI'}
+    return token, index + 1
+
+def read_div(line, index):
+    token = {'type': 'DIV'}
+    return token, index + 1
+
 
 def tokenize(line):
     tokens = []
@@ -36,6 +44,10 @@ def tokenize(line):
             (token, index) = read_plus(line, index)
         elif line[index] == '-':
             (token, index) = read_minus(line, index)
+        elif line[index] == '*':
+            (token, index) = read_multi(line, index)
+        elif line[index] == '/':
+            (token, index) = read_div(line, index)
         else:
             print('Invalid character found: ' + line[index])
             exit(1)
@@ -46,13 +58,29 @@ def tokenize(line):
 def evaluate(tokens):
     answer = 0
     tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
+    newTokens = [{'type': 'PLUS'}] # Token list after multiplying and dividing
     index = 1
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
-            if tokens[index - 1]['type'] == 'PLUS':
-                answer += tokens[index]['number']
-            elif tokens[index - 1]['type'] == 'MINUS':
-                answer -= tokens[index]['number']
+            if tokens[index - 1]['type'] == 'MULTI':
+                before = newTokens.pop()
+                number = before['number'] * tokens[index]['number']
+                newTokens.append({'type': 'NUMBER', 'number':number})
+            elif tokens[index - 1]['type'] == 'DIV':
+                before = newTokens.pop()
+                number = before['number'] / tokens[index]['number']
+                newTokens.append({'type': 'NUMBER', 'number':number})
+            else: # If tokens[index - 1] is '+' or '-', directly add the token and number to the newToken list
+                newTokens.extend([tokens[index - 1], tokens[index]])
+        index += 1
+    
+    index = 1
+    while index < len(newTokens):
+        if newTokens[index]['type'] == 'NUMBER':
+            if newTokens[index - 1]['type'] == 'PLUS':
+                answer += newTokens[index]['number']
+            elif newTokens[index - 1]['type'] == 'MINUS':
+                answer -= newTokens[index]['number']
             else:
                 print('Invalid syntax')
                 exit(1)
@@ -73,8 +101,17 @@ def test(line):
 # Add more tests to this function :)
 def run_test():
     print("==== Test started! ====")
+    test("1")
     test("1+2")
+    test("1.0+2")
     test("1.0+2.1-3")
+    test("3*4")
+    test("3.0*4")
+    test("3.0*4.2")
+    test("3/2")
+    test("5.0/2")
+    test("5.0/3.0")
+    test("3.0+4*2-1/5")
     print("==== Test finished! ====\n")
 
 run_test()
