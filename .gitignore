@@ -176,5 +176,8 @@ cython_debug/
 # testfile
 test.ipynb
 
+# datasets
+*/datasets/
+
 # output files
 */outputs/
