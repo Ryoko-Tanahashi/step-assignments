@@ -4,3 +4,4 @@
 - 経路中の各点について、AとBを設定する。
 - 点Aに近い√N個の点を求め、close_citiesとする
 - close_citiesの各点Cについて、点Bと点Cを入れ替えた時の総距離と現在の総距離を比較し、入れ替えた方が良い場合は入れ替える
+上記の操作を、経路の改善率が`(past_distance - current_distance)/past_distance < 0.01`となるまで繰り返す。
