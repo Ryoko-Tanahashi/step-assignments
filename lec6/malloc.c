@@ -38,7 +38,7 @@ typedef struct my_heap_t {
 //
 // Static variables (DO NOT ADD ANOTHER STATIC VARIABLES!)
 //
-my_heap_t my_heap_bin[4];
+my_heap_t my_heap_bin[14];
 
 //
 // Helper functions (feel free to add/remove/edit!)
@@ -46,6 +46,7 @@ my_heap_t my_heap_bin[4];
 
 int BIN_COUNT = 14;
 
+// Returns the index of bin based on size
 int get_bin_index(size_t size) {
     if (size <= 128)
         return 0;
@@ -79,6 +80,7 @@ int get_bin_index(size_t size) {
 
 void my_add_to_free_list(my_metadata_t *metadata) {
     assert(!metadata->next);
+    // Add free metadata to the corresponding bin
     int i = get_bin_index(metadata->size);
     metadata->next = my_heap_bin[i].free_head;
     my_heap_bin[i].free_head = metadata;
@@ -88,6 +90,8 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
     if (prev) {
         prev->next = metadata->next;
     } else {
+        // If there aren't any previous data, add metadata to the beggining of
+        // the corresponding bin(based on size)
         int i = get_bin_index(metadata->size);
         my_heap_bin[i].free_head = metadata->next;
     }
@@ -118,6 +122,7 @@ void *my_malloc(size_t size) {
 
     int start_bin = get_bin_index(size);
 
+    // Check the bins from the smaller (but not too small) ones
     for (int i = start_bin; i < BIN_COUNT; i++) {
         my_metadata_t *curr = my_heap_bin[i].free_head;
         my_metadata_t *prev = NULL;
@@ -130,6 +135,8 @@ void *my_malloc(size_t size) {
             prev = curr;
             curr = curr->next;
         }
+        // Because it's best-fit, if a minmetadata is found in one bin, proceed
+        // without checking the bigger bins
         if (minmetadata) break;
     }
 
