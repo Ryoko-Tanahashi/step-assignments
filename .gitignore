@@ -175,6 +175,11 @@ cython_debug/
 
 # testfile
 test.ipynb
+test.py
+
+# datasets
+*/datasets/
 
 # output files
 */outputs/
+/lec5/google-step-tsp
