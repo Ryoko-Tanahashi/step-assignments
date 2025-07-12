@@ -73,6 +73,9 @@ class HashTable:
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
+
+        if self.item_count > self.bucket_size * 0.7:
+            self.rehash(self.bucket_size * 2 + 1)
         return True
 
     # Get an item from the hash table.
@@ -104,16 +107,20 @@ class HashTable:
         # Changed:
         bucket_index = calculate_hash(key) % self.bucket_size
         item = self.buckets[bucket_index]
+        prev = None
         while item:
             if item.key == key:
-                if item.next:
-                    self.buckets[bucket_index] = item.next
+                if prev:
+                    prev.next = item.next
                 else:
-                    self.buckets[bucket_index] = None
+                    self.buckets[bucket_index] = item.next
                 self.item_count -= 1
+                if self.item_count < self.bucket_size * 0.3:
+                    self.rehash(self.bucket_size // 2)
                 self.check_size()
                 return True
             else:
+                prev = item
                 item = item.next
 
         return False
@@ -132,6 +139,20 @@ class HashTable:
                 self.item_count >= self.bucket_size * 0.3)
         # 条件を満たしていなかったら一回全部の値を移し替えてからselfを置き換えるか今あるやつを拡張するか
 
+    def rehash(self, size):
+        old_buckets = self.buckets
+        self.bucket_size = size
+        self.buckets = [None] * self.bucket_size
+        self.item_count = 0
+        for bucket in old_buckets:
+            item = bucket
+            while item:
+                next_item = item.next
+                bucket_index = calculate_hash(item.key) % self.bucket_size
+                item.next = self.buckets[bucket_index]
+                self.buckets[bucket_index] = item
+                self.item_count += 1
+                item = next_item
 
 # Test the functional behavior of the hash table.
 def functional_test():
@@ -200,7 +221,7 @@ def functional_test():
 
 
 # Test the performance of the hash table.
-#
+
 # Your goal is to make the hash table work with mostly O(1).
 # If the hash table works with mostly O(1), the execution time of each iteration
 # should not depend on the number of items in the hash table. To achieve the
